@@ -1,6 +1,6 @@
 
 # ignore the venv directory
-venv/
+myvenv/
 # ignore the .vscode directory
 .vscode/
 # ignore the .idea directory
@@ -17,3 +17,11 @@ __pycache__/
 .pytest_cache/
 # ignore logs
 logs/
+*.pyc
+*.pkl
+*.log
+*.db
+*.gguf
+*.pt
+*.bin
+*.ckpt
