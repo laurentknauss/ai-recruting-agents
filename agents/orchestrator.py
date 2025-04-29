@@ -1,0 +1,104 @@
+from typing import Dict, Any
+from .base_agent import BaseAgent 
+from .extractor_agent import ExtractorAgent 
+from .analyzer_agents import AnalyzerAgent 
+from .matcher_agent import MatcherAgent
+from .screener_agent import ScreenerAgent 
+from .recommender_agent import RecommenderAgent 
+
+
+
+class OrchestratorAgent(BaseAgent): 
+  def __init__(self):
+    super().__init__(
+      name="Orchestrator",
+      instructions="""Coordinnate the recruitment workflow and delegates tasks to specialized agents.
+      Ensure proper flow of information between extraction, analysis, matching, screening, and recommendation phases.
+      Maintain context and aggregate results from each stage.""",
+    )
+    self.setup_agents() 
+    
+  def setup_agents(self): 
+      """Initialize all specialised agents"""
+      self.extractor = ExtractorAgent() 
+      self.analyzer = AnalyzerAgent() 
+      self.matcher = MatcherAgent() 
+      self.screener =  ScreenerAgent() 
+      self.recommender = RecommenderAgent() 
+      
+  async def run(self, messages: list) -> Dict[str, Any]: 
+    """Process a single message through the agent""" 
+    prompt = messages[-1]["content"] 
+    response = self._query_ollama(prompt) 
+    return self._parse_josn_safely(response) 
+      
+
+
+
+
+async def process_application(self, resume_data: dict[str, Any]) -> Dict[str, Any] : 
+  """Main workflow orchestrator for processing job applications""" 
+  print("🎯 Orchestrator: Starting application process")
+  
+  workflow_context = { 
+      "resume_data": resume_data, 
+      "status": "initialised", 
+      "current_stage" : "extraction",
+      }
+
+
+  try:                     # Extract resume information 
+        extracted_data = await self.extractor.run(
+            [{"role": "user", "content": str(resume_data)}] 
+          )
+        workflow_context.update(
+            {"extracted_data": extracted_data, "current_stage": "analysis"} 
+          )
+          
+          
+          
+          # Analyze candidate profile 
+        analysis_results = await self.analyzer.run(
+            [{"role": "user" , "content": str(extracted_data)}]     
+          ) 
+        workflow_context.update(
+            {"analysis_result": analysis_results, "current_stage":"matching"} 
+          )
+          
+          # Match with jobs 
+        job_matches = await self.matcher.run(
+            [{"role": "user", "content": str(analysis_results)}] 
+           )
+        workflow_context.update(
+              {"job_matches" : job_matches, "current_stage" : "screening"}
+            )
+            
+          
+          # Screen candidates 
+        screening_results = await self.screener.run(
+            [{"role": "user" , "content": str(workflow_context)}] 
+             )
+        workflow_context.update(
+            { 
+            "screening_results": screening_results,
+            "current_stage" : "recommendation",
+            }
+          )
+          
+          
+          # Generate recommendations 
+          
+        final_recommendation = await self.recommender.run(
+            [{ "role": "user" , "content": str(workflow_context)}] 
+          )
+        workflow_context.update(
+            {"final_recommendation": final_recommendation,
+            "status" : "completed" } 
+          )
+          
+        return workflow_context
+      
+  except Exception as e: 
+      workflow_context.update({"status" : "failed", "error": str(e)}) 
+      raise
+    
