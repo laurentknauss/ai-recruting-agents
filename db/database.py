@@ -1,6 +1,6 @@
 import sqlite3 
 from pathlib import Path
-from typing import Dict, Any 
+from typing import List, Dict, Any 
 import json
 import os 
 

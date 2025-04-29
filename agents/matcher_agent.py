@@ -1,4 +1,4 @@
-from typing import Dict, Any 
+from typing import List, Dict, Any 
 from .base_agent import BaseAgent 
 from db.database  import JobDatabase
 import ast 

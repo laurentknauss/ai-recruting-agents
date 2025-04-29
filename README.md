@@ -23,3 +23,5 @@ This project leverages AI agents built with the **Swarms** framework and **Ollam
 
 
 
+### how to run this ? 
+python -m streamlit run app.py
